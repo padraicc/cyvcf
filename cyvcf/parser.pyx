@@ -542,7 +542,7 @@ cdef class Record(object):
         self.FORMAT = tmp
 
     def add_filter(self, flt):
-        if self.FILTER is None or self.FILTER == b'PASS':
+        if self.FILTER is None:
             self.FILTER = b''
         else:
             tmp = self.FILTER + ';'
@@ -633,7 +633,8 @@ cdef class Record(object):
         if len(self.REF) > 1 and not is_sv: return True
         for alt in self.ALT:
             if alt is None:
-                return True
+                if self.aaf > 0.0 and self.aaf < 1.0: # distingish from monomorphic sites in the population in an all-sites vcf
+                    return False
             elif len(alt) != len(self.REF):
                 # the diff. b/w INDELs and SVs can be murky.
                 if not is_sv:
@@ -1072,7 +1073,7 @@ cdef class Reader(object):
             qual = float(row[5])
         #FILT
         cdef object filt = row[6].split(';') if ';' in row[6] else row[6]
-        if filt == b'PASS' or filt == b'.':
+        if filt == b'.':
              filt = None
         #INFO
         cdef dict info = self._parse_info(row[7])
