@@ -932,10 +932,16 @@ cdef class Reader(object):
                 try:
                     val = _map(int, vals)
                 except ValueError:
-                    val = _map(float, vals)
+                    try:
+                        val = _map(float, vals)
+                    except ValueError:
+                        val = _map(str, vals)
             elif entry_type == b'Float':
                 vals = entry[1].split(',')
-                val = _map(float, vals)
+                try:
+                    val = _map(float, vals)
+                except ValueError:
+                    val = _map(str, vals)
             elif entry_type == b'Flag':
                 val = True
             elif entry_type == b'String':
